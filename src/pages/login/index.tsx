@@ -1,17 +1,18 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { api } from "../../api/api";
 import * as style from './style'
 import { useNavigate } from "react-router-dom";
 import useFlashMessage from "../../hooks/useFlashMessage";
+import { Context } from "../../context/UserContext";
 
 const Login = () => {
     const [pass, setPass] = useState('')
     const [email, setEmail] = useState('')
     const [logado, setLogado] = useState(false)
 
-    const navigate = useNavigate()
+    //const {login} = useContext(Context)
 
-    const {setFlashMessage} = useFlashMessage()
+    const navigate = useNavigate()
 
     const handleChange = (e: any) => {
         if(e.target.name === 'email'){
@@ -32,7 +33,6 @@ const Login = () => {
                 navigate('/')
             }else{
                 console.log('erro no bagulho')
-                console.log(setFlashMessage(obj_token.data.message,'error'))
             }
         } catch (e) {
             
