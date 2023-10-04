@@ -1,7 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 
 import Login from '../pages/login';
-import Teste from '../pages/teste';
+
+import Home from '../pages/home';
 
 export const RouteList = () => {
   return (
@@ -9,15 +10,16 @@ export const RouteList = () => {
       <Route
         path="/"
         element={
-          <Login />
+          <Home />
         }
       />
       <Route
-        path="/teste"
+        path="/login"
         element={
-          <Teste />
+          <Login />
         }
       />
+
     </Routes>
   )
 }
