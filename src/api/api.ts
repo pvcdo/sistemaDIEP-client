@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 export const api = axios.create({
-  baseURL: "https://sistema-diep-server.vercel.app/" || 'http://localhost:8080/' ,
+  baseURL: process.env.BASE_URL || 'http://localhost:5000/' ,
   headers: {
     'Accept' : '*/*',
     'Content-Type': 'application/json',
