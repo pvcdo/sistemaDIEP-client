@@ -1,25 +1,27 @@
-import React, { useContext, useEffect, useState } from "react";
-import { api } from "../../api/api";
+import React, {  useState } from "react";
 import * as style from './style'
-import { useNavigate } from "react-router-dom";
-import useFlashMessage from "../../hooks/useFlashMessage";
-import { Context } from "../../context/UserContext";
+
 import Snackbar from "@mui/material/Snackbar";
+import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
+
+import useAuth from "../../hooks/useAuth";
+
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref,
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const Login = () => {
   const [pass, setPass] = useState('')
   const [email, setEmail] = useState('')
-  const [logado, setLogado] = useState(false)
 
-  const [token] = useState(localStorage.getItem('token') || '')
+  const [messageOpen, setMessageOpen] = useState(false)
+  const [message, setMessage] = useState('')
+  const [typeMessage, setTypeMsg] = useState<AlertColor>('error')
 
-  //const {login} = useContext(Context)
-
-  useEffect(() => {
-
-  }, [token])
-
-  const navigate = useNavigate()
+  const {login} = useAuth()
 
   const handleChange = (e: any) => {
     if (e.target.name === 'email') {
@@ -32,28 +34,47 @@ const Login = () => {
 
   const handleSubmit = async () => {
 
-    try {
+    /* try {
       const obj_token = await api.post('/users/login', { email, senha: pass })
-      console.log(obj_token.data)
-      localStorage.setItem('item', obj_token.data.token)
+      //console.log(obj_token.data)
+      localStorage.setItem('token', JSON.stringify(obj_token.data.token))
     } catch (e) {
       console.log('erro no bagulho')
-      console.error(e)
+      const err = e as AxiosError
+      //@ts-ignore
+      console.error(err.response?.data.message)
+      //@ts-ignore
+      const err_msg = err.response?.data.message
 
-        
-      }
+    } */
+
+    const res_login = await login({email, senha: pass})
+
+    setMessage(res_login.msg)
+    setTypeMsg(res_login.type_msg)
+    setMessageOpen(true)
 
   }
 
+  const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setMessageOpen(false);
+  };
+
   return (
     <>
-      {/* < Snackbar
-        open = { open }
-        autoHideDuration = { 6000}
-        onClose = { handleClose }
-        message = "Note archived"
-        action = { action }
-      /> */}
+      < Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        open = { messageOpen }
+        autoHideDuration = {2000}
+        onClose={handleClose}
+      >
+        <Alert severity={typeMessage} sx={{ width: '100%' }}>
+          {message}
+        </Alert>
+      </Snackbar>
       <style.Limiter>
         <style.FormLogin>
           <style.Title>
@@ -80,7 +101,6 @@ const Login = () => {
           </style.ContainerButton>
         </style.FormLogin>
       </style.Limiter>
-      {logado && <p>Usuário logado</p>}
     </>
   )
 }

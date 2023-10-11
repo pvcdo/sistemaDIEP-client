@@ -3,7 +3,13 @@ import { useNavigate } from 'react-router-dom'
 
 import {api} from '../api/api'
 
-import useFlashMessage from './useFlashMessage'
+import { AxiosError } from 'axios'
+import { AlertColor } from '@mui/material'
+
+interface objLogin {
+  email: string,
+  senha: string
+}
 
 export default function useAuth() {
   
@@ -17,14 +23,14 @@ export default function useAuth() {
     if(token){
       api.defaults.headers.Authorization = `Bearer ${JSON.parse(token)}`
       setAuthenticated(true)
-    }else{
+    }
+    if(!token){
       navigate('/login')
     }
+    // eslint-disable-next-line
   },[])
 
   async function register(user: any) {
-    let message = "Usuário registrado com sucesso!"
-    let type = "success"
 
     try {
       const data = await api.post('/users/register', user)
@@ -40,36 +46,44 @@ export default function useAuth() {
   }
 
   function logout(){
-    const msg = "Usuário deslogado com êxito"
-    const type = "success"
 
     setAuthenticated(false)
-    localStorage.removeItem('token')
-    api.defaults.headers.Authorization = null
-    navigate('/')
-
+    setTimeout(() => {
+      localStorage.removeItem('token')
+      api.defaults.headers.Authorization = null
+      navigate('/login')
+    }, 3000); 
+    
 
   }
 
-  async function login(user: any){
-    let msg = 'Usuário logado com sucesso!'
-    let type = 'success'
+  async function login(login: objLogin){
 
     try {
-      const data = await api.post('/users/login', user).then((response) => {
-        return response.data
-      })
-      await authUser(data)
-    } catch (error) {
-      console.error("Erro em login " + error)
+      const obj_token = await api.post('/users/login', {...login})
+      authUser(obj_token.data)
+      
+      return ({msg: 'Login efetuado com sucesso', type_msg: 'success' as AlertColor})
+    } catch (e) {
+      console.log('erro no bagulho')
+      const err = e as AxiosError
+      //@ts-ignore
+      console.error(err.response?.data.message)
+      //@ts-ignore
+      const err_msg = err.response?.data.message
+
+      return ({msg: err_msg, type_msg: 'error' as AlertColor})
+
     }
 
   }
 
   async function authUser(data: any){
     setAuthenticated(true)
-    localStorage.setItem('token',JSON.stringify(data.token))
-    navigate('/')
+    localStorage.setItem('token', JSON.stringify(data.token))
+    setTimeout(() => {
+      navigate('/')
+    }, 3000); 
   }
 
   return { register, authenticated, logout, login }
